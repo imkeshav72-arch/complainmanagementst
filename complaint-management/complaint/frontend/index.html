@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Complaint Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f8fafc;--card:#fff;--sidebar:#7c3aed;--border:#e2e8f0;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--orange:#f97316;--purple:#7c3aed;--text:#1e293b;--muted:#64748b;--font:'Inter',sans-serif;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);}
+    .sidebar{position:fixed;left:0;top:0;width:220px;height:100vh;background:var(--sidebar);display:flex;flex-direction:column;z-index:100;}
+    .logo{padding:20px;border-bottom:1px solid rgba(255,255,255,0.12);}
+    .logo h2{font-size:1rem;font-weight:800;color:#fff;}
+    .logo p{font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:3px;}
+    .nav{padding:12px 8px;flex:1;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:9px;cursor:pointer;font-size:0.85rem;font-weight:500;color:rgba(255,255,255,0.65);transition:all 0.2s;margin-bottom:3px;}
+    .nav-item:hover{background:rgba(255,255,255,0.1);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,0.2);color:#fff;}
+    .main{margin-left:220px;padding:24px;}
+    .page{display:none;animation:fadeIn 0.3s ease;}
+    .page.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .page-header{margin-bottom:20px;}
+    .page-header h1{font-size:1.45rem;font-weight:800;}
+    .page-header p{color:var(--muted);font-size:0.85rem;margin-top:3px;}
+    .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+    .stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;}
+    .stat-value{font-size:1.55rem;font-weight:800;}
+    .c-purple{color:var(--purple);}.c-yellow{color:var(--yellow);}.c-blue{color:var(--blue);}.c-green{color:var(--green);}.c-red{color:var(--red);}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+    .card-title{font-size:0.92rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-group{display:flex;flex-direction:column;gap:5px;}
+    .form-group.full{grid-column:1/-1;}
+    label{font-size:0.73rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+    input,select,textarea{background:#f8fafc;border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:var(--font);font-size:0.87rem;outline:none;transition:border-color 0.2s;}
+    input:focus,select:focus,textarea:focus{border-color:var(--purple);background:#fff;}
+    textarea{resize:vertical;min-height:80px;}
+    .btn{padding:9px 18px;border:none;border-radius:8px;font-family:var(--font);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:#6d28d9;transform:translateY(-1px);}
+    .btn-sm{padding:5px 11px;font-size:0.75rem;border-radius:7px;}
+    .btn-danger{background:transparent;border:1px solid #fecaca;color:var(--red);font-size:0.75rem;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:var(--font);}
+    .btn-row{display:flex;gap:8px;margin-top:14px;}
+    table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+    thead tr{background:#f8fafc;}
+    th{padding:10px 13px;text-align:left;font-size:0.71rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;border-bottom:1px solid var(--border);}
+    td{padding:11px 13px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#fafafa;}
+    .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.72rem;font-weight:600;}
+    .b-green{background:#dcfce7;color:#15803d;}.b-yellow{background:#fef9c3;color:#92400e;}.b-red{background:#fef2f2;color:#dc2626;}.b-blue{background:#dbeafe;color:#1d4ed8;}.b-purple{background:#ede9fe;color:#6d28d9;}.b-orange{background:#ffedd5;color:#c2410c;}
+    .search-bar{margin-bottom:12px;}
+    .search-bar input{width:100%;max-width:320px;}
+    .empty-state{text-align:center;padding:32px;color:var(--muted);font-size:0.87rem;}
+    .toast{position:fixed;bottom:20px;right:20px;z-index:999;background:#fff;border:1px solid var(--border);border-radius:11px;padding:12px 17px;font-size:0.86rem;font-weight:600;transform:translateY(80px);opacity:0;transition:all 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{border-color:#c4b5fd;color:var(--purple);}
+    .toast.error{border-color:#fecaca;color:var(--red);}
+    .priority-high{color:var(--red);font-weight:700;}
+    .priority-medium{color:var(--yellow);font-weight:700;}
+    .priority-low{color:var(--green);font-weight:700;}
+    .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+    .filter-btn:hover,.filter-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo"><h2>📢 ComplaintMgr</h2><p>Management System</p></div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showPage('dashboard')"><span>📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('complaints')"><span>📋</span> All Complaints</div>
+    <div class="nav-item" onclick="showPage('file')"><span>➕</span> File Complaint</div>
+    <div class="nav-item" onclick="showPage('staff')"><span>👤</span> Staff</div>
+  </nav>
+</div>
+
+<div class="main">
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header"><h1>Dashboard</h1><p>Complaint management overview</p></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Complaints</div><div class="stat-value c-purple" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value c-yellow" id="stat-pending">—</div></div>
+      <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value c-blue" id="stat-inprog">—</div></div>
+      <div class="stat-card"><div class="stat-label">Resolved</div><div class="stat-value c-green" id="stat-resolved">—</div></div>
+      <div class="stat-card"><div class="stat-label">High Priority</div><div class="stat-value c-red" id="stat-high">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Recent Complaints</div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>No.</th><th>Name</th><th>Department</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="dash-complaints"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL COMPLAINTS -->
+  <div class="page" id="page-complaints">
+    <div class="page-header"><h1>All Complaints</h1><p>View and manage all complaints</p></div>
+    <div class="card">
+      <div class="filter-bar">
+        <div class="filter-btn active" onclick="filterStatus('All',this)">All</div>
+        <div class="filter-btn" onclick="filterStatus('Pending',this)">🟡 Pending</div>
+        <div class="filter-btn" onclick="filterStatus('In Progress',this)">🔵 In Progress</div>
+        <div class="filter-btn" onclick="filterStatus('Resolved',this)">🟢 Resolved</div>
+        <div class="filter-btn" onclick="filterStatus('Closed',this)">⚫ Closed</div>
+      </div>
+      <div class="search-bar"><input type="text" id="comp-search" placeholder="🔍 Search by name, subject or department..." oninput="renderComplaints()"/></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>#</th><th>Complaint No</th><th>Name</th><th>Dept</th><th>Category</th><th>Subject</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="complaints-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE COMPLAINT -->
+  <div class="page" id="page-file">
+    <div class="page-header"><h1>File Complaint</h1><p>Submit a new complaint</p></div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="c-name" placeholder="Your full name"/></div>
+        <div class="form-group"><label>Phone *</label><input type="text" id="c-phone" placeholder="9876543210"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="c-email" placeholder="your@email.com"/></div>
+        <div class="form-group"><label>Department *</label>
+          <select id="c-dept">
+            <option value="">Select</option>
+            <option>IT</option><option>Admin</option><option>HR</option>
+            <option>Finance</option><option>Maintenance</option><option>Security</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Category *</label>
+          <select id="c-cat">
+            <option value="">Select</option>
+            <option>Technical Issue</option><option>Service Issue</option><option>Billing Issue</option>
+            <option>Staff Behaviour</option><option>Facility Issue</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Priority</label>
+          <select id="c-priority"><option value="Low">Low</option><option value="Medium" selected>Medium</option><option value="High">High</option></select>
+        </div>
+        <div class="form-group"><label>Assign To</label><select id="c-assign"></select></div>
+        <div class="form-group full"><label>Subject *</label><input type="text" id="c-subject" placeholder="Brief subject of complaint"/></div>
+        <div class="form-group full"><label>Description *</label><textarea id="c-desc" placeholder="Describe your complaint in detail..."></textarea></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="fileComplaint()">📤 Submit Complaint</button></div>
+    </div>
+  </div>
+
+  <!-- STAFF -->
+  <div class="page" id="page-staff">
+    <div class="page-header"><h1>Staff</h1><p>Manage complaint handling staff</p></div>
+    <div class="card">
+      <div class="card-title">➕ Add Staff</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Name *</label><input type="text" id="st-name" placeholder="Staff name"/></div>
+        <div class="form-group"><label>Department *</label>
+          <select id="st-dept"><option value="">Select</option>
+            <option>IT</option><option>Admin</option><option>HR</option><option>Finance</option><option>Maintenance</option><option>Security</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="st-email" placeholder="staff@org.com"/></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="st-phone" placeholder="9876543210"/></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="addStaff()">Add Staff</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👤 All Staff</div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>#</th><th>Name</th><th>Department</th><th>Email</th><th>Phone</th></tr></thead>
+        <tbody id="staff-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:5000';
+let allComplaints=[], allStaff=[], statusFilter='All';
+const pages=['dashboard','complaints','file','staff'];
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item')[pages.indexOf(name)].classList.add('active');
+  if(name==='dashboard') loadDashboard();
+  if(name==='complaints') loadComplaints();
+  if(name==='file') loadStaffDropdown();
+  if(name==='staff') loadStaff();
+}
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='success'?'✅ ':'❌ ')+msg;
+  t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',3000);
+}
+
+function priorityBadge(p){
+  const m={High:'b-red',Medium:'b-yellow',Low:'b-green'};
+  return `<span class="badge ${m[p]||'b-blue'}">${p}</span>`;
+}
+function statusBadge(s){
+  const m={Pending:'b-yellow','In Progress':'b-blue',Resolved:'b-green',Closed:'b-purple'};
+  return `<span class="badge ${m[s]||'b-orange'}">${s}</span>`;
+}
+
+async function loadDashboard(){
+  const [stats,comps]=await Promise.all([
+    fetch(API+'/stats').then(r=>r.json()),
+    fetch(API+'/complaints').then(r=>r.json())
+  ]);
+  document.getElementById('stat-total').textContent=stats.total;
+  document.getElementById('stat-pending').textContent=stats.pending;
+  document.getElementById('stat-inprog').textContent=stats.in_progress;
+  document.getElementById('stat-resolved').textContent=stats.resolved;
+  document.getElementById('stat-high').textContent=stats.high_priority;
+  const tbody=document.getElementById('dash-complaints');
+  tbody.innerHTML=comps.slice(0,8).map(c=>`<tr>
+    <td><b>${c.complaint_no}</b></td><td>${c.name}</td><td>${c.department}</td>
+    <td>${c.subject}</td><td>${priorityBadge(c.priority)}</td><td>${statusBadge(c.status)}</td><td>${c.filed_date}</td>
+  </tr>`).join('')||'<tr><td colspan="7" class="empty-state">No complaints yet.</td></tr>';
+}
+
+async function loadComplaints(){
+  allComplaints=await fetch(API+'/complaints').then(r=>r.json());
+  renderComplaints();
+}
+
+function filterStatus(s,btn){
+  statusFilter=s;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderComplaints();
+}
+
+function renderComplaints(){
+  const q=document.getElementById('comp-search')?.value.toLowerCase()||'';
+  let list=allComplaints.filter(c=>
+    (statusFilter==='All'||c.status===statusFilter)&&
+    (c.name.toLowerCase().includes(q)||c.subject.toLowerCase().includes(q)||c.department.toLowerCase().includes(q))
+  );
+  const tbody=document.getElementById('complaints-body');
+  if(!list.length){tbody.innerHTML='<tr><td colspan="11" class="empty-state">No complaints found.</td></tr>';return;}
+  tbody.innerHTML=list.map((c,i)=>`<tr>
+    <td>${i+1}</td><td><b>${c.complaint_no}</b></td><td>${c.name}</td>
+    <td>${c.department}</td><td>${c.category}</td>
+    <td title="${c.description}">${c.subject.length>30?c.subject.slice(0,30)+'...':c.subject}</td>
+    <td>${priorityBadge(c.priority)}</td>
+    <td>${c.assigned_to||'—'}</td>
+    <td>
+      <select onchange="updateStatus(${c.id},this.value)" style="font-size:0.74rem;padding:4px 8px;border-radius:7px;border:1px solid var(--border);background:#f8fafc;color:var(--text)">
+        ${['Pending','In Progress','Resolved','Closed'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </td>
+    <td>${c.filed_date}</td>
+    <td><button class="btn-danger" onclick="deleteComplaint(${c.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+async function updateStatus(id,status){
+  await fetch(API+'/complaints/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+  toast('Status updated to '+status);
+  loadComplaints();
+}
+
+async function deleteComplaint(id){
+  if(!confirm('Delete this complaint?')) return;
+  await fetch(API+'/complaints/'+id,{method:'DELETE'});
+  toast('Deleted!'); loadComplaints();
+}
+
+async function loadStaffDropdown(){
+  const staff=await fetch(API+'/staff').then(r=>r.json());
+  document.getElementById('c-assign').innerHTML='<option value="">-- Unassigned --</option>'+
+    staff.map(s=>`<option value="${s.name}">${s.name} (${s.department})</option>`).join('');
+}
+
+async function fileComplaint(){
+  const name=document.getElementById('c-name').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const department=document.getElementById('c-dept').value;
+  const category=document.getElementById('c-cat').value;
+  const priority=document.getElementById('c-priority').value;
+  const assigned_to=document.getElementById('c-assign').value;
+  const subject=document.getElementById('c-subject').value.trim();
+  const description=document.getElementById('c-desc').value.trim();
+  if(!name||!phone||!department||!category||!subject||!description){toast('Fill all required fields!','error');return;}
+  const complaint_no='CMP'+Date.now().toString().slice(-6);
+  const res=await fetch(API+'/complaints',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({complaint_no,name,email,phone,department,category,subject,description,priority,assigned_to})});
+  if(res.ok){
+    toast('Complaint filed! No: '+complaint_no);
+    ['c-name','c-phone','c-email','c-subject','c-desc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('c-dept').value=''; document.getElementById('c-cat').value='';
+  } else toast('Error filing complaint','error');
+}
+
+async function loadStaff(){
+  allStaff=await fetch(API+'/staff').then(r=>r.json());
+  const tbody=document.getElementById('staff-body');
+  tbody.innerHTML=allStaff.map((s,i)=>`<tr><td>${i+1}</td><td><b>${s.name}</b></td><td>${s.department}</td><td>${s.email||'—'}</td><td>${s.phone||'—'}</td></tr>`).join('')
+    ||'<tr><td colspan="5" class="empty-state">No staff found.</td></tr>';
+}
+
+async function addStaff(){
+  const name=document.getElementById('st-name').value.trim();
+  const department=document.getElementById('st-dept').value;
+  const email=document.getElementById('st-email').value.trim();
+  const phone=document.getElementById('st-phone').value.trim();
+  if(!name||!department){toast('Name and department required!','error');return;}
+  await fetch(API+'/staff',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,department,email,phone})});
+  toast('Staff added!');
+  ['st-name','st-email','st-phone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('st-dept').value='';
+  loadStaff();
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
